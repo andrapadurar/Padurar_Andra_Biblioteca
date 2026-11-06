@@ -13,27 +13,76 @@
     <a asp-action="Create">Carte noua</a>
 </p>
 
-<form asp-action="Index" method="get" class="mb-3">
-    Cauta dupa titlu:
+<!-- Cautare si filtrare -->
+<form asp-action="Index" method="get" class="mb-4">
 
-    <input type="text"
-           name="searchString"
-           value="@ViewData["CurrentFilter"]" />
+    <div class="row g-3 align-items-end">
 
-    <button type="submit" class="btn btn-primary btn-sm">
-        Cauta
-    </button>
+        <div class="col-md-4">
+            <label for="searchString" class="form-label">
+                Cauta dupa titlu
+            </label>
+            <input type="text"
+                   id="searchString"
+                   name="searchString"
+                   value="@ViewData["CurrentFilter"]"
+                   class="form-control" />
+        </div>
 
-    <a asp-action="Index">Toata lista</a>
+        <div class="col-md-2">
+            <label for="minPrice" class="form-label">
+                Pret minim
+            </label>
+            <input type="number"
+                   id="minPrice"
+                   name="minPrice"
+                   min="0"
+                   step="0.01"
+                   value="@(((decimal?)ViewData["MinPrice"])?.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label for="maxPrice" class="form-label">
+                Pret maxim
+            </label>
+            <input type="number"
+                   id="maxPrice"
+                   name="maxPrice"
+                   min="0"
+                   step="0.01"
+                   value="@(((decimal?)ViewData["MaxPrice"])?.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <input type="hidden"
+                   name="sortOrder"
+                   value="@ViewData["CurrentSort"]" />
+
+            <button type="submit" class="btn btn-primary">
+                Filtreaza
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Reseteaza
+            </a>
+        </div>
+
+    </div>
 </form>
 
-<table class="table">
+<!-- Catalog -->
+<table class="table table-striped">
     <thead>
         <tr>
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["TitleSortParm"]"
-                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-minPrice="@ViewData["MinPrice"]"
+                   asp-route-maxPrice="@ViewData["MaxPrice"]">
                     Titlu
                 </a>
             </th>
@@ -41,7 +90,9 @@
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["AuthorSortParm"]"
-                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-minPrice="@ViewData["MinPrice"]"
+                   asp-route-maxPrice="@ViewData["MaxPrice"]">
                     Autor
                 </a>
             </th>
@@ -51,13 +102,15 @@
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["PriceSortParm"]"
-                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-minPrice="@ViewData["MinPrice"]"
+                   asp-route-maxPrice="@ViewData["MaxPrice"]">
                     Pret
                 </a>
             </th>
 
             <th>Comenzi</th>
-            <th></th>
+            <th>Actiuni</th>
         </tr>
     </thead>
 
@@ -85,22 +138,36 @@
     </tbody>
 </table>
 
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex - 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-outline-primary @prevDisabled">
-    Inapoi
-</a>
+@if (!Model.Any())
+{
+    <p>Nu au fost gasite carti pentru filtrele selectate.</p>
+}
 
-<a asp-action="Index"
-   asp-route-sortOrder="@ViewData["CurrentSort"]"
-   asp-route-pageNumber="@(Model.PageIndex + 1)"
-   asp-route-currentFilter="@ViewData["CurrentFilter"]"
-   class="btn btn-outline-primary @nextDisabled">
-    Inainte
-</a>
+<!-- Paginare -->
+<div class="mt-3">
 
-<span class="ms-2">
-    Pagina @Model.PageIndex din @Model.TotalPages
-</span>
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       asp-route-minPrice="@ViewData["MinPrice"]"
+       asp-route-maxPrice="@ViewData["MaxPrice"]"
+       class="btn btn-outline-primary @prevDisabled">
+        Inapoi
+    </a>
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-pageNumber="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       asp-route-minPrice="@ViewData["MinPrice"]"
+       asp-route-maxPrice="@ViewData["MaxPrice"]"
+       class="btn btn-outline-primary @nextDisabled">
+        Inainte
+    </a>
+
+    <span class="ms-2">
+        Pagina @Model.PageIndex din @Model.TotalPages
+    </span>
+
+</div>

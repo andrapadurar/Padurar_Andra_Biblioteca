@@ -23,12 +23,13 @@ namespace Intalnirea1.Controllers
             _logger = logger;
         }
 
-        // GET: Books
-        // A3 + A4 + S2
+        // GET: Books - A3, A4, S2, S3
         public async Task<IActionResult> Index(
             string? sortOrder,
             string? currentFilter,
             string? searchString,
+            decimal? minPrice,
+            decimal? maxPrice,
             int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
@@ -42,23 +43,39 @@ namespace Intalnirea1.Controllers
             ViewData["AuthorSortParm"] =
                 sortOrder == "author" ? "author_desc" : "author";
 
+            // La o cautare noua revenim la pagina 1
             if (searchString != null)
                 pageNumber = 1;
             else
                 searchString = currentFilter;
 
             ViewData["CurrentFilter"] = searchString;
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = maxPrice;
 
-            var books = _context.Book.AsQueryable();
+            var books = _context.Book.AsNoTracking().AsQueryable();
 
             // Cautare dupa titlu
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
                 books = books.Where(b =>
                     b.Title.Contains(searchString));
             }
 
-            // Sortare
+            // S3 - Filtrare dupa intervalul de pret
+            if (minPrice.HasValue)
+            {
+                books = books.Where(b =>
+                    b.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                books = books.Where(b =>
+                    b.Price <= maxPrice.Value);
+            }
+
+            // Sortare in baza de date
             books = sortOrder switch
             {
                 "title" => books.OrderBy(b => b.Title),
@@ -71,7 +88,6 @@ namespace Intalnirea1.Controllers
                 "price_desc" =>
                     books.OrderByDescending(b => b.Price),
 
-                // S2: sortare dupa autor
                 "author" => books
                     .OrderBy(b => b.Author!.LastName)
                     .ThenBy(b => b.Author!.FirstName)
@@ -82,13 +98,13 @@ namespace Intalnirea1.Controllers
                     .ThenByDescending(b => b.Author!.FirstName)
                     .ThenBy(b => b.Title),
 
-                // Varianta B2: sortare implicita
+                // Varianta B2
                 _ => books
                     .OrderByDescending(b => b.Orders.Count())
                     .ThenBy(b => b.ID)
             };
 
-            // Proiectie realizata in SQL
+            // Proiectie - executata in SQL
             var rows = books.Select(b => new BookListItem(
                 b.ID,
                 b.Title,
@@ -100,12 +116,14 @@ namespace Intalnirea1.Controllers
                 b.Orders.Count()
             ));
 
-            // Varianta A3: 8 carti pe pagina
+            // Varianta A3 - 8 carti pe pagina
             const int pageSize = 8;
 
             return View(
                 await PaginatedList<BookListItem>.CreateAsync(
-                    rows, pageNumber ?? 1, pageSize));
+                    rows,
+                    pageNumber ?? 1,
+                    pageSize));
         }
 
         // GET: Books/Details/5
