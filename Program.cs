@@ -20,10 +20,8 @@ builder.Services.AddDbContext<LibraryContext>(options =>
         ?? throw new InvalidOperationException(
             "Connection string 'LibraryContext' not found.")));
 
-// MVC
 builder.Services.AddControllersWithViews();
 
-// Modelul de recomandare existent
 builder.Services
     .AddPredictionEnginePool<BookRating, BookRatingPrediction>()
     .FromFile(
@@ -31,10 +29,9 @@ builder.Services
         filePath: "MLModels/BookRecommender.zip",
         watchForChanges: true);
 
-// Laboratorul 5 - A2
+// A2 - Serviciul de reantrenare
 builder.Services.AddScoped<RecommenderTrainer>();
 
-// Ollama
 var endpoint = new Uri("http://localhost:11434/v1/");
 
 IChatClient chat = new OpenAIClient(
@@ -50,17 +47,14 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// OpenAPI si Scalar
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
 
-// API-ul bibliotecii
 app.MapLibraryApi();
 
-// Endpoint AI pentru prezentarea unei carti
 app.MapPost("/api/v2/books/{id:int}/pitch",
     async (int id, LibraryContext db, IChatClient ai) =>
     {
@@ -76,10 +70,10 @@ app.MapPost("/api/v2/books/{id:int}/pitch",
         [
             new(
             ChatRole.System,
-            "Esti bibliotecar. Raspunde in romana, in cel mult 2 propozitii."),
+            "Ești bibliotecar. Răspunde în română, în cel mult 2 propoziții."),
         new(
             ChatRole.User,
-            $"Recomanda „{b.Title}” de {b.Author?.FullName} " +
+            $"Recomandă „{b.Title}” de {b.Author?.FullName} " +
             $"({b.Genre?.Name}). ")
         ];
 
@@ -92,12 +86,82 @@ app.MapPost("/api/v2/books/{id:int}/pitch",
         });
     });
 
-// Endpoint pentru intrebari AI
 app.MapGet("/api/v2/ask",
     async (string q, IChatClient ai) =>
         (await ai.GetResponseAsync(q)).Text);
 
-// Migrari si date initiale
+// A3 - API de recomandari cu cold start
+app.MapGet("/api/v2/readers/{id:int}/recommendations",
+    async (
+        int id,
+        int? top,
+        LibraryContext db,
+        PredictionEnginePool<BookRating, BookRatingPrediction> pool) =>
+    {
+        var n = Math.Clamp(top ?? 5, 1, 20);
+
+        var rated = await db.Rating
+            .Where(r => r.ReaderId == id)
+            .Select(r => r.BookID)
+            .ToListAsync();
+
+        var candidates = await db.Book
+            .AsNoTracking()
+            .Where(b => !rated.Contains(b.ID))
+            .Select(b => new { b.ID, b.Title })
+            .ToListAsync();
+
+        var recs = candidates
+            .Select(b => new RecommendationDto(
+                b.ID,
+                b.Title,
+                pool.Predict(
+                    "BookRecommender",
+                    new BookRating
+                    {
+                        UserId = id,
+                        BookId = b.ID
+                    }).Score,
+                false))
+            .Where(r => !float.IsNaN(r.Score))
+            .OrderByDescending(r => r.Score)
+            .Take(n)
+            .ToList();
+
+        if (recs.Count == 0)
+        {
+            // Prag A3: minimum 12 evaluari pentru fiecare carte
+            var popular = await db.Rating
+                .GroupBy(r => r.BookID)
+                .Where(g => g.Count() >= 12)
+                .Select(g => new
+                {
+                    BookID = g.Key,
+                    Avg = g.Average(r => r.Stars)
+                })
+                .OrderByDescending(x => x.Avg)
+                .Take(n)
+                .ToListAsync();
+
+            var ids = popular.Select(p => p.BookID).ToList();
+
+            var titles = await db.Book
+                .Where(b => ids.Contains(b.ID))
+                .ToDictionaryAsync(b => b.ID, b => b.Title);
+
+            recs = popular
+                .Select(p => new RecommendationDto(
+                    p.BookID,
+                    titles[p.BookID],
+                    (float)p.Avg,
+                    true))
+                .ToList();
+        }
+
+        return TypedResults.Ok(recs);
+    })
+.WithTags("Recomandări");
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
@@ -107,7 +171,6 @@ using (var scope = app.Services.CreateScope())
     LibrarySeed.Seed(db);
 }
 
-// HTTP pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -119,6 +182,7 @@ app.UseHttpsRedirection();
 app.UseRequestLocalization("en-US");
 
 app.UseRouting();
+
 app.UseAuthorization();
 
 app.MapStaticAssets();

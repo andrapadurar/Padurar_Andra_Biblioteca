@@ -22,7 +22,9 @@ Reantrenarea a fost executată cu succes din interfața aplicației.
 
 ## A3 – Recomandări și cold start
 
-De completat după implementare.
+Cititorul 5 primește recomandări personalizate, calculate de modelul ML.NET. În răspuns apare "fallback": false, ceea ce confirmă că se folosește modelul.
+
+Cititorul 999 primește recomandări generale, bazate pe cărțile cele mai bine evaluate, care au cel puțin 12 evaluări, conform variantei A3. În răspuns apare "fallback": true, ceea ce confirmă activarea mecanismului Cold Start.
 
 ## A4 – Clasificarea genului cărților
 

@@ -72,6 +72,19 @@ POST {{host}}/api/v2/books/3/pitch
 POST {{host}}/api/v2/books/37/pitch
 
 
+###
+GET {{host}}/api/v2/readers/5/recommendations
+
+###
+
+GET {{host}}/api/v2/readers/5/recommendations?top=3
+
+###
+
+GET {{host}}/api/v2/readers/999/recommendations
+
+
+
 
 
 
