@@ -25,16 +25,29 @@ namespace Intalnirea1.Controllers
         }
 
         // GET: Books
-        // Laboratorul 4 - A3
+        // Laboratorul 4 - A4: paginare
         public async Task<IActionResult> Index(
             string? sortOrder,
-            string? searchString)
+            string? currentFilter,
+            string? searchString,
+            int? pageNumber)
         {
+            ViewData["CurrentSort"] = sortOrder;
+
             ViewData["TitleSortParm"] =
                 sortOrder == "title" ? "title_desc" : "title";
 
             ViewData["PriceSortParm"] =
                 sortOrder == "price" ? "price_desc" : "price";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
 
             ViewData["CurrentFilter"] = searchString;
 
@@ -47,7 +60,7 @@ namespace Intalnirea1.Controllers
                     b.Title.Contains(searchString));
             }
 
-            // Sortare - varianta B2
+            // Sortare conform variantei B2
             books = sortOrder switch
             {
                 "title" => books.OrderBy(b => b.Title),
@@ -64,21 +77,27 @@ namespace Intalnirea1.Controllers
             };
 
             // Proiectie in BookListItem
-            var rows = await books
-                .Select(b => new BookListItem(
-                    b.ID,
-                    b.Title,
-                    b.Author != null
-                        ? b.Author.FirstName + " " + b.Author.LastName
-                        : "",
-                    b.Genre != null
-                        ? b.Genre.Name
-                        : "",
-                    b.Price,
-                    b.Orders.Count))
-                .ToListAsync();
+            var rows = books.Select(b => new BookListItem(
+                b.ID,
+                b.Title,
+                b.Author != null
+                    ? b.Author.FirstName + " " + b.Author.LastName
+                    : "",
+                b.Genre != null
+                    ? b.Genre.Name
+                    : "",
+                b.Price,
+                b.Orders.Count
+            ));
 
-            return View(rows);
+            // Varianta A3: 8 carti pe pagina
+            const int pageSize = 8;
+
+            return View(
+                await PaginatedList<BookListItem>.CreateAsync(
+                    rows,
+                    pageNumber ?? 1,
+                    pageSize));
         }
 
         // GET: Books/Details/5

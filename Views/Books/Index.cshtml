@@ -1,7 +1,10 @@
-@model IEnumerable<Intalnirea1.Models.BookListItem>
+@model Intalnirea1.Models.PaginatedList<Intalnirea1.Models.BookListItem>
 
 @{
     ViewData["Title"] = "Catalog";
+
+    var prevDisabled = Model.HasPreviousPage ? "" : "disabled";
+    var nextDisabled = Model.HasNextPage ? "" : "disabled";
 }
 
 <h1>Catalog</h1>
@@ -12,6 +15,7 @@
 
 <form asp-action="Index" method="get" class="mb-3">
     Cauta dupa titlu:
+
     <input type="text"
            name="searchString"
            value="@ViewData["CurrentFilter"]" />
@@ -29,19 +33,22 @@
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["TitleSortParm"]"
-                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
                     Titlu
                 </a>
             </th>
+
             <th>Autor</th>
             <th>Gen</th>
+
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@ViewData["PriceSortParm"]"
-                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
                     Pret
                 </a>
             </th>
+
             <th>Comenzi</th>
             <th></th>
         </tr>
@@ -65,3 +72,23 @@
         }
     </tbody>
 </table>
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-outline-primary @prevDisabled">
+    Inapoi
+</a>
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-outline-primary @nextDisabled">
+    Inainte
+</a>
+
+<span class="ms-2">
+    Pagina @Model.PageIndex din @Model.TotalPages
+</span>
