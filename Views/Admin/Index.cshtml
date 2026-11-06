@@ -12,7 +12,7 @@
 }
 
 <p>
-    Evaluări în baza de date:
+    Evaluari in baza de date:
     <strong>@ViewBag.Ratings</strong>
 </p>
 
@@ -27,6 +27,15 @@
 
     <button type="submit"
             class="btn btn-primary btn-sm">
-        Importă evaluări
+        Importa evaluari
+    </button>
+</form>
+
+<hr />
+
+<form asp-action="Retrain" method="post">
+    <button type="submit"
+            class="btn btn-warning btn-sm">
+        Reantreneaza modelul de recomandare
     </button>
 </form>

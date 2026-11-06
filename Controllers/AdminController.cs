@@ -3,33 +3,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Intalnirea1.Data;
 using Intalnirea1.Models;
+using Intalnirea1.Services;
 
 namespace Intalnirea1.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController(
+        LibraryContext db,
+        RecommenderTrainer trainer) : Controller
     {
-        private readonly LibraryContext _db;
-
-        public AdminController(LibraryContext db)
-        {
-            _db = db;
-        }
-
         // GET: Admin
         public async Task<IActionResult> Index()
         {
-            ViewBag.Ratings = await _db.Rating.CountAsync();
+            ViewBag.Ratings = await db.Rating.CountAsync();
             return View();
         }
 
-        // POST: Admin/ImportRatings
+        // A1 - Import evaluari din CSV
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ImportRatings(IFormFile? file)
         {
-            if (file == null || file.Length == 0)
+            if (file is null || file.Length == 0)
             {
-                TempData["Msg"] = "Alegeți un fișier CSV.";
+                TempData["Msg"] = "Alegeti un fisier CSV.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -47,27 +43,44 @@ namespace Intalnirea1.Controllers
                 var p = line.Split(',');
 
                 if (p.Length < 3 ||
-                    !int.TryParse(p[0], out var userId) ||
-                    !int.TryParse(p[1], out var bookId) ||
-                    !int.TryParse(p[2], out var stars))
+                    !int.TryParse(p[0], out var u) ||
+                    !int.TryParse(p[1], out var b) ||
+                    !int.TryParse(p[2], out var s))
                 {
                     continue;
                 }
 
+                if (u <= 0 || b <= 0 || s < 1 || s > 5)
+                    continue;
+
                 ratings.Add(new Rating
                 {
-                    ReaderId = userId,
-                    BookID = bookId,
-                    Stars = stars,
+                    ReaderId = u,
+                    BookID = b,
+                    Stars = s,
                     CreatedAt = DateTime.UtcNow
                 });
             }
 
-            _db.Rating.AddRange(ratings);
-            await _db.SaveChangesAsync();
+            db.Rating.AddRange(ratings);
+            await db.SaveChangesAsync();
 
             TempData["Msg"] =
-                $"Au fost importate {ratings.Count} evaluări.";
+                $"Au fost importate {ratings.Count} evaluari.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // A2 - Reantrenare din aplicatie
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Retrain()
+        {
+            var (rmse, count) = await trainer.TrainAsync();
+
+            TempData["Msg"] =
+                $"Model reantrenat pe {count} evaluari. " +
+                $"RMSE = {rmse:0.00}";
 
             return RedirectToAction(nameof(Index));
         }
