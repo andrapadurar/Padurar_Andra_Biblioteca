@@ -24,8 +24,7 @@ namespace Intalnirea1.Controllers
             _logger = logger;
         }
 
-        // GET: Books
-        // Laboratorul 4 - A4: paginare
+        // GET: Books - A3 + A4
         public async Task<IActionResult> Index(
             string? sortOrder,
             string? currentFilter,
@@ -41,51 +40,39 @@ namespace Intalnirea1.Controllers
                 sortOrder == "price" ? "price_desc" : "price";
 
             if (searchString != null)
-            {
                 pageNumber = 1;
-            }
             else
-            {
                 searchString = currentFilter;
-            }
 
             ViewData["CurrentFilter"] = searchString;
 
             var books = _context.Book.AsQueryable();
 
-            // Cautare dupa titlu
             if (!string.IsNullOrEmpty(searchString))
             {
                 books = books.Where(b =>
                     b.Title.Contains(searchString));
             }
 
-            // Sortare conform variantei B2
             books = sortOrder switch
             {
                 "title" => books.OrderBy(b => b.Title),
-
                 "title_desc" => books.OrderByDescending(b => b.Title),
-
                 "price" => books.OrderBy(b => b.Price),
-
                 "price_desc" => books.OrderByDescending(b => b.Price),
 
-                // B2: numarul de comenzi, descrescator
+                // Varianta B2
                 _ => books.OrderByDescending(b => b.Orders.Count())
                           .ThenBy(b => b.ID)
             };
 
-            // Proiectie in BookListItem
             var rows = books.Select(b => new BookListItem(
                 b.ID,
                 b.Title,
                 b.Author != null
                     ? b.Author.FirstName + " " + b.Author.LastName
                     : "",
-                b.Genre != null
-                    ? b.Genre.Name
-                    : "",
+                b.Genre != null ? b.Genre.Name : "",
                 b.Price,
                 b.Orders.Count
             ));
@@ -95,28 +82,26 @@ namespace Intalnirea1.Controllers
 
             return View(
                 await PaginatedList<BookListItem>.CreateAsync(
-                    rows,
-                    pageNumber ?? 1,
-                    pageSize));
+                    rows, pageNumber ?? 1, pageSize));
         }
 
         // GET: Books/Details/5
+        // A5 - Incarcam autorul, genul, comenzile si cititorii
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var book = await _context.Book
-                .Include(b => b.Genre)
                 .Include(b => b.Author)
+                .Include(b => b.Genre)
+                .Include(b => b.Orders)
+                    .ThenInclude(o => o.Customer)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (book == null)
-            {
                 return NotFound();
-            }
 
             return View(book);
         }
@@ -126,13 +111,11 @@ namespace Intalnirea1.Controllers
         {
             ViewData["AuthorID"] = new SelectList(
                 _context.Author.OrderBy(a => a.LastName),
-                "ID",
-                "FullName");
+                "ID", "FullName");
 
             ViewData["GenreID"] = new SelectList(
                 _context.Genre.OrderBy(g => g.Name),
-                "ID",
-                "Name");
+                "ID", "Name");
 
             return View();
         }
@@ -148,21 +131,16 @@ namespace Intalnirea1.Controllers
             {
                 _context.Add(book);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["AuthorID"] = new SelectList(
                 _context.Author.OrderBy(a => a.LastName),
-                "ID",
-                "FullName",
-                book.AuthorID);
+                "ID", "FullName", book.AuthorID);
 
             ViewData["GenreID"] = new SelectList(
                 _context.Genre.OrderBy(g => g.Name),
-                "ID",
-                "Name",
-                book.GenreID);
+                "ID", "Name", book.GenreID);
 
             return View(book);
         }
@@ -171,28 +149,20 @@ namespace Intalnirea1.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var book = await _context.Book.FindAsync(id);
 
             if (book == null)
-            {
                 return NotFound();
-            }
 
             ViewData["AuthorID"] = new SelectList(
                 _context.Author.OrderBy(a => a.LastName),
-                "ID",
-                "FullName",
-                book.AuthorID);
+                "ID", "FullName", book.AuthorID);
 
             ViewData["GenreID"] = new SelectList(
                 _context.Genre.OrderBy(g => g.Name),
-                "ID",
-                "Name",
-                book.GenreID);
+                "ID", "Name", book.GenreID);
 
             return View(new BookEditViewModel
             {
@@ -205,31 +175,23 @@ namespace Intalnirea1.Controllers
         }
 
         // POST: Books/Edit/5
-        // Protectie la overposting prin ViewModel
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            int id,
-            BookEditViewModel vm)
+            int id, BookEditViewModel vm)
         {
             if (id != vm.ID)
-            {
                 return NotFound();
-            }
 
             if (!ModelState.IsValid)
             {
                 ViewData["AuthorID"] = new SelectList(
                     _context.Author.OrderBy(a => a.LastName),
-                    "ID",
-                    "FullName",
-                    vm.AuthorID);
+                    "ID", "FullName", vm.AuthorID);
 
                 ViewData["GenreID"] = new SelectList(
                     _context.Genre.OrderBy(g => g.Name),
-                    "ID",
-                    "Name",
-                    vm.GenreID);
+                    "ID", "Name", vm.GenreID);
 
                 return View(vm);
             }
@@ -237,9 +199,7 @@ namespace Intalnirea1.Controllers
             var book = await _context.Book.FindAsync(id);
 
             if (book == null)
-            {
                 return NotFound();
-            }
 
             book.Title = vm.Title;
             book.Price = vm.Price;
@@ -247,7 +207,6 @@ namespace Intalnirea1.Controllers
             book.GenreID = vm.GenreID;
 
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -255,9 +214,7 @@ namespace Intalnirea1.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var book = await _context.Book
                 .Include(b => b.Genre)
@@ -265,9 +222,7 @@ namespace Intalnirea1.Controllers
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (book == null)
-            {
                 return NotFound();
-            }
 
             return View(book);
         }

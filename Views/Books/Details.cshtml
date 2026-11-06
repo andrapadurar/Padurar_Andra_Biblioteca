@@ -9,33 +9,62 @@
 <div>
     <h4>Book</h4>
     <hr />
+
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
+        <dt class="col-sm-2">Titlu</dt>
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Title)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Author.FullName)
+
+        <dt class="col-sm-2">An</dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Year)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
+
+        <dt class="col-sm-2">Preț</dt>
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Price)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre.ID)
+
+        <dt class="col-sm-2">Descriere</dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt class="col-sm-2">Autor</dt>
+        <dd class="col-sm-10">
+            @Model.Author?.FullName
+        </dd>
+
+        <dt class="col-sm-2">Gen</dt>
+        <dd class="col-sm-10">
+            @Model.Genre?.Name
+        </dd>
+
+        <dt class="col-sm-2">Comenzi</dt>
+        <dd class="col-sm-10">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Cititor</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var o in Model.Orders.OrderByDescending(o => o.OrderDate))
+                    {
+                        <tr>
+                            <td>@o.Customer?.Name</td>
+                            <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </dd>
     </dl>
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
