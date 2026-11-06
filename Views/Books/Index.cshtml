@@ -1,36 +1,67 @@
-@model IEnumerable<Intalnirea1.Models.BookRow>
+@model IEnumerable<Intalnirea1.Models.BookListItem>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Catalog";
 }
 
-<h1>Index</h1>
+<h1>Catalog</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Carte noua</a>
 </p>
-<p>
-    Varianta: <strong>@ViewData["Variant"]</strong> ·
-    <a asp-action="Index" asp-route-v="A">A · fără Include</a> |
-    <a asp-action="Index" asp-route-v="B">B · Include</a> |
-    <a asp-action="Index" asp-route-v="C">C · Load în buclă</a> |
-    <a asp-action="Index" asp-route-v="D">D · proiecție</a>
-</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    Cauta dupa titlu:
+    <input type="text"
+           name="searchString"
+           value="@ViewData["CurrentFilter"]" />
+
+    <button type="submit" class="btn btn-primary btn-sm">
+        Cauta
+    </button>
+
+    <a asp-action="Index">Toata lista</a>
+</form>
+
 <table class="table">
     <thead>
         <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Orders</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["TitleSortParm"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                    Titlu
+                </a>
+            </th>
+            <th>Autor</th>
+            <th>Gen</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["PriceSortParm"]"
+                   asp-route-searchString="@ViewData["CurrentFilter"]">
+                    Pret
+                </a>
+            </th>
+            <th>Comenzi</th>
+            <th></th>
         </tr>
     </thead>
+
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.Title</td>
-            <td>@item.Author</td>
-            <td>@item.Orders</td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Author</td>
+                <td>@item.Genre</td>
+                <td>@item.Price.ToString("0.00")</td>
+                <td>@item.Orders</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

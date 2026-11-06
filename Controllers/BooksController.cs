@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -25,77 +24,62 @@ namespace Intalnirea1.Controllers
             _logger = logger;
         }
 
-        // GET: Books?v=A|B|C|D
-        public async Task<IActionResult> Index(string v = "D")
+        // GET: Books
+        // Laboratorul 4 - A3
+        public async Task<IActionResult> Index(
+            string? sortOrder,
+            string? searchString)
         {
-            var sw = Stopwatch.StartNew();
-            List<BookRow> rows;
+            ViewData["TitleSortParm"] =
+                sortOrder == "title" ? "title_desc" : "title";
 
-            switch (v.ToUpperInvariant())
+            ViewData["PriceSortParm"] =
+                sortOrder == "price" ? "price_desc" : "price";
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var books = _context.Book.AsQueryable();
+
+            // Cautare dupa titlu
+            if (!string.IsNullOrEmpty(searchString))
             {
-                case "A":
-                    {
-                        var books = await _context.Book.ToListAsync();
-                        rows = ToRows(books);
-                        break;
-                    }
-
-                case "B":
-                    {
-                        var books = await _context.Book
-                            .Include(b => b.Author)
-                            .Include(b => b.Orders)
-                            .ToListAsync();
-
-                        rows = ToRows(books);
-                        break;
-                    }
-
-                case "C":
-                    {
-                        var books = await _context.Book.ToListAsync();
-
-                        foreach (var b in books)
-                        {
-                            var e = _context.Entry(b);
-                            await e.Reference(x => x.Author).LoadAsync();
-                            await e.Collection(x => x.Orders).LoadAsync();
-                        }
-
-                        rows = ToRows(books);
-                        break;
-                    }
-
-                default:
-                    {
-                        v = "D";
-
-                        rows = await _context.Book
-                            .Select(b => new BookRow(
-                                b.Title,
-                                b.Author!.FirstName + " " + b.Author.LastName,
-                                b.Orders.Count))
-                            .ToListAsync();
-
-                        break;
-                    }
+                books = books.Where(b =>
+                    b.Title.Contains(searchString));
             }
 
-            _logger.LogInformation(
-                "Index {Variant}: {Ms} ms",
-                v,
-                sw.ElapsedMilliseconds);
+            // Sortare - varianta B2
+            books = sortOrder switch
+            {
+                "title" => books.OrderBy(b => b.Title),
 
-            ViewData["Variant"] = v;
+                "title_desc" => books.OrderByDescending(b => b.Title),
+
+                "price" => books.OrderBy(b => b.Price),
+
+                "price_desc" => books.OrderByDescending(b => b.Price),
+
+                // B2: numarul de comenzi, descrescator
+                _ => books.OrderByDescending(b => b.Orders.Count())
+                          .ThenBy(b => b.ID)
+            };
+
+            // Proiectie in BookListItem
+            var rows = await books
+                .Select(b => new BookListItem(
+                    b.ID,
+                    b.Title,
+                    b.Author != null
+                        ? b.Author.FirstName + " " + b.Author.LastName
+                        : "",
+                    b.Genre != null
+                        ? b.Genre.Name
+                        : "",
+                    b.Price,
+                    b.Orders.Count))
+                .ToListAsync();
 
             return View(rows);
         }
-
-        private static List<BookRow> ToRows(List<Book> books) =>
-            books.Select(b => new BookRow(
-                b.Title,
-                b.Author?.LastName ?? "(gol)",
-                b.Orders.Count)).ToList();
 
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -202,7 +186,7 @@ namespace Intalnirea1.Controllers
         }
 
         // POST: Books/Edit/5
-        // Protectie la overposting folosind ViewModel
+        // Protectie la overposting prin ViewModel
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -280,9 +264,8 @@ namespace Intalnirea1.Controllers
             if (book != null)
             {
                 _context.Book.Remove(book);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
