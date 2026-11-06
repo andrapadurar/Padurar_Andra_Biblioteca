@@ -38,7 +38,14 @@
                 </a>
             </th>
 
-            <th>Autor</th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["AuthorSortParm"]"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    Autor
+                </a>
+            </th>
+
             <th>Gen</th>
 
             <th>
@@ -64,9 +71,14 @@
                 <td>@item.Price.ToString("0.00")</td>
                 <td>@item.Orders</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    <a asp-action="Edit"
+                       asp-route-id="@item.ID">Edit</a> |
+
+                    <a asp-action="Details"
+                       asp-route-id="@item.ID">Details</a> |
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.ID">Delete</a>
                 </td>
             </tr>
         }

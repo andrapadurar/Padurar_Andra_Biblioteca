@@ -1,6 +1,5 @@
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +23,8 @@ namespace Intalnirea1.Controllers
             _logger = logger;
         }
 
-        // GET: Books - A3 + A4
+        // GET: Books
+        // A3 + A4 + S2
         public async Task<IActionResult> Index(
             string? sortOrder,
             string? currentFilter,
@@ -39,6 +39,9 @@ namespace Intalnirea1.Controllers
             ViewData["PriceSortParm"] =
                 sortOrder == "price" ? "price_desc" : "price";
 
+            ViewData["AuthorSortParm"] =
+                sortOrder == "author" ? "author_desc" : "author";
+
             if (searchString != null)
                 pageNumber = 1;
             else
@@ -48,24 +51,44 @@ namespace Intalnirea1.Controllers
 
             var books = _context.Book.AsQueryable();
 
+            // Cautare dupa titlu
             if (!string.IsNullOrEmpty(searchString))
             {
                 books = books.Where(b =>
                     b.Title.Contains(searchString));
             }
 
+            // Sortare
             books = sortOrder switch
             {
                 "title" => books.OrderBy(b => b.Title),
-                "title_desc" => books.OrderByDescending(b => b.Title),
-                "price" => books.OrderBy(b => b.Price),
-                "price_desc" => books.OrderByDescending(b => b.Price),
 
-                // Varianta B2
-                _ => books.OrderByDescending(b => b.Orders.Count())
-                          .ThenBy(b => b.ID)
+                "title_desc" =>
+                    books.OrderByDescending(b => b.Title),
+
+                "price" => books.OrderBy(b => b.Price),
+
+                "price_desc" =>
+                    books.OrderByDescending(b => b.Price),
+
+                // S2: sortare dupa autor
+                "author" => books
+                    .OrderBy(b => b.Author!.LastName)
+                    .ThenBy(b => b.Author!.FirstName)
+                    .ThenBy(b => b.Title),
+
+                "author_desc" => books
+                    .OrderByDescending(b => b.Author!.LastName)
+                    .ThenByDescending(b => b.Author!.FirstName)
+                    .ThenBy(b => b.Title),
+
+                // Varianta B2: sortare implicita
+                _ => books
+                    .OrderByDescending(b => b.Orders.Count())
+                    .ThenBy(b => b.ID)
             };
 
+            // Proiectie realizata in SQL
             var rows = books.Select(b => new BookListItem(
                 b.ID,
                 b.Title,
@@ -74,7 +97,7 @@ namespace Intalnirea1.Controllers
                     : "",
                 b.Genre != null ? b.Genre.Name : "",
                 b.Price,
-                b.Orders.Count
+                b.Orders.Count()
             ));
 
             // Varianta A3: 8 carti pe pagina
@@ -86,7 +109,6 @@ namespace Intalnirea1.Controllers
         }
 
         // GET: Books/Details/5
-        // A5 - Incarcam autorul, genul, comenzile si cititorii
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -98,7 +120,7 @@ namespace Intalnirea1.Controllers
                 .Include(b => b.Orders)
                     .ThenInclude(o => o.Customer)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(b => b.ID == id);
 
             if (book == null)
                 return NotFound();
@@ -219,7 +241,7 @@ namespace Intalnirea1.Controllers
             var book = await _context.Book
                 .Include(b => b.Genre)
                 .Include(b => b.Author)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(b => b.ID == id);
 
             if (book == null)
                 return NotFound();
