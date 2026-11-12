@@ -10,7 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.85.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.85.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.85.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

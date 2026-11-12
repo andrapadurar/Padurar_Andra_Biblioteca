@@ -1,70 +1,47 @@
-# Laboratorul Î4 · Nechita Paula · nr. matricol 1212 · varianta A2 · B1
+## Laboratorul Î9 · Padurar Andra · nr. matricol 121200068 · varianta A3 · B2
 
 | Parametru | Valoarea mea |
 |---|---|
-| A (ultima cifră a nr. matricol: 2) | A2 |
-| B (penultima cifră a nr. matricol: 1) | B1 |
-| V1 · cărți pe pagină | 7 |
-| V2 · sortarea implicită a catalogului | preț descrescător |
-| V3 · filtrul din S3 | an de la–până la |
-| V4 · indicatorul din S2 | prețul mediu al cărților autorului |
+| A (ultima cifră: 8) | A3 |
+| B (penultima cifră: 6) | B2 |
+| ID cititor pentru teste | 1068 |
+| Prag „Foarte recomandată” | 4,5 |
+| Prag „Recomandată” | 3,5 |
+| Tool MCP pentru S2 | most_ordered_books |
 
-## S1 · Comenzile
+### A1 – Portalul cititorului
 
-- Protecția la overposting aleasă: [De completat]
-- De ce am ales-o: [De completat]
+- Am creat proiectul Biblioteca.Portal folosind ASP.NET Core MVC.
+- Am configurat comunicarea gRPC cu aplicația Biblioteca.
+- Am implementat RecommendationsViewModel, RecommendationsController și pagina Recommendations/Index.
+- Cititorul 5: au fost afișate 5 recomandări cu titluri și scoruri.
+- Cititorul 1068: nu au fost afișate recomandări.
 
-## S2 · Pagina unui autor și sortarea după autor
+**Eticheta „cititor nou”:** Nu apare pentru cititorul 1068 deoarece serviciul nu a returnat recomandări. Eticheta este afișată doar pentru rezultatele cu `Fallback = true`.
+
+### A2 – Contractul gRPC
 
 [De completat după implementare]
 
-## S3 · Filtrul variantei mele (V3)
+### A3 – Erori gRPC
+
+[De completat după testare]
+
+### S1 – Evaluările cititorului
 
 [De completat după implementare]
 
-## S4 · Folosirea AI
+### S2 – Tool MCP: most_ordered_books
 
-[De completat pe parcursul laboratorului]
+[De completat după implementare]
 
-## Ce nu am reușit (opțional)
+### Folosirea AI
 
-[De completat la final]
+- Instrument utilizat: ChatGPT.
+- Scop: explicarea cerințelor, configurarea proiectului și corectarea erorilor.
+- Exemplu de cerere: „Cum configurez clientul gRPC în Biblioteca.Portal?”
+- Răspuns greșit sau incomplet: [De completat după identificarea unui exemplu concret și modul în care a fost corectat.]
 
+### Ce nu am reușit
 
-
-## Laboratorul Î5
-
-### A1 – Import evaluări
-- Au fost importate 6599 de evaluări din book-ratings.csv.
-- Importul a fost realizat din pagina Admin.
-
-### A2 – Reantrenarea modelului
-- Modelul ML.NET a fost reantrenat cu 6599 de evaluări.
-- RMSE: [completează valoarea afișată în aplicație].
-
-### A3 – API de recomandări
-- Prag pentru varianta A2: 10 evaluări.
-- Cititorul 5: API testat cu succes, 5 recomandări.
-- Cititorul 999: API testat cu succes, 5 recomandări alternative.
-- Recomandările includ ID-ul cărții, titlul și scorul.
-
-### A4 – Clasificarea genurilor literare
-- Fișier utilizat: book-descriptions.csv.
-- Model antrenat cu ML.NET.
-- MacroAccuracy: 0,7483 (74,83%).
-- MicroAccuracy: 0,7509 (75,09%).
-
-### S1 – Jurnalizarea recomandărilor
-- Am creat tabelul RecommendationLog prin migrare EF Core.
-- Recomandările personalizate și alternative sunt salvate automat.
-- Pagina /RecommendationLogs afișează istoricul recomandărilor.
-- Filtrarea după ID-ul cititorului a fost testată cu succes.
-- Paginare implementată: 10 înregistrări pe pagină.
-
-
-### S2 – Dashboard statistic
-- Totalul cărților, evaluărilor și cititorilor este calculat din baza de date.
-- Media evaluărilor este afișată în dashboard.
-- Este afișat numărul recomandărilor înregistrate.
-- Varianta B1: grafic cu numărul evaluărilor grupate după autor.
-- Dashboard-ul a fost testat cu succes la /Admin.
+[De completat la final, dacă este cazul.]
