@@ -25,7 +25,8 @@ message BookScore {
   int32 book_id = 1;
   string title = 2;
   float score = 3;
-  bool fallback = 4;      // true (cold start)
+  bool fallback = 4; 
+  string label = 5;   // true (cold start)
 }
 
 message RecommendReply {

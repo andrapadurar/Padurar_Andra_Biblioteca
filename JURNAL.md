@@ -21,8 +21,19 @@
 
 ### A2 – Contractul gRPC
 
-[De completat după implementare]
+Am adăugat câmpul label = 5 în recommender.proto.
 
+Am implementat etichetele pentru varianta A3, cu pragurile 4,5 și 3,5.
+
+Portalul a funcționat în continuare cu vechiul contract gRPC.
+
+Biblioteca.Client: opțiunea 1 (Unary) a returnat 3 recomandări, iar opțiunea 2 (Server streaming) a returnat 5 recomandări.
+
+După actualizarea contractului în Portal, etichetele au fost afișate corect.
+
+Experiment title = 6: Titlurile cărților au dispărut din tabel, dar scorurile și etichetele au rămas vizibile. Acest lucru se întâmplă deoarece Protocol Buffers identifică fiecare câmp după numărul său, nu după nume.
+
+Am revenit la title = 2 pentru a restabili compatibilitatea.
 ### A3 – Erori gRPC
 
 [De completat după testare]

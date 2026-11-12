@@ -38,6 +38,7 @@
             <tr>
                 <th>Carte</th>
                 <th>Scor</th>
+                <th>Etichetă</th>
                 <th></th>
             </tr>
         </thead>
@@ -48,6 +49,7 @@
                 <tr>
                     <td>@b.Title</td>
                     <td>@b.Score.ToString("0.00")</td>
+                    <td>@b.Label</td>
                     <td>
                         @if (b.Fallback)
                         {
