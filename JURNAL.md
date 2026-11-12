@@ -36,7 +36,13 @@ Experiment title = 6: Titlurile cărților au dispărut din tabel, dar scorurile
 Am revenit la title = 2 pentru a restabili compatibilitatea.
 ### A3 – Erori gRPC
 
-[De completat după testare]
+Am implementat validarea cererilor în Recommend și StreamRecommendations.
+
+Pentru cititorul -3, serverul a returnat InvalidArgument, cu mesajul „reader_id trebuie să fie un număr pozitiv”.
+
+Pentru Top = 50, rezultatul așteptat este InvalidArgument, cu mesajul „top poate fi cel mult 20”.
+
+La oprirea serverului Biblioteca, Portalul a afișat Unavailable: Error connecting to subchannel.
 
 ### S1 – Evaluările cititorului
 
