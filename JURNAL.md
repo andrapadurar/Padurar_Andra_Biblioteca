@@ -58,15 +58,24 @@ Am putea implementa autentificare pentru a permite  cititorului  să-și gestion
 
 ### S2 – Tool MCP: most_ordered_books
 
-[De completat după implementare]
+- Am implementat instrumentul most_ordered_books în LibraryTools.cs.
+- Instrumentul returnează cele mai comandate cărți, ordonate descrescător după numărul comenzilor.
+- Parametrul top acceptă valori între 1 și 10, implicit 5.
+- Am verificat schema JSON folosind Inspectorul MCP.
+- Testul cu top = 5 a funcționat (IsError: False).
+Rezultatul testului:
+Carte	Număr comenzi
+Craii de Curtea-Veche	15
+Culoarea magiei	11
+Cuvinte potrivite	11
+Fundația	11
+Istoria critică a românilor	10- Pentru top = 50, serverul a generat eroarea ArgumentException, cu mesajul „Parametrul top trebuie sa fie intre 1 si 10”.
+ Am instalat modelul Ollama llama3.2, dar nu am reușit să finalizez testarea Agentului deoarece laptopul s-a blocat în timpul rulării.
 
 ### Folosirea AI
 
 - Instrument utilizat: ChatGPT.
 - Scop: explicarea cerințelor, configurarea proiectului și corectarea erorilor.
 - Exemplu de cerere: „Cum configurez clientul gRPC în Biblioteca.Portal?”
-- Răspuns greșit sau incomplet: [De completat după identificarea unui exemplu concret și modul în care a fost corectat.]
-
-### Ce nu am reușit
-
-[De completat la final, dacă este cazul.]
+La implementarea instrumentului most_ordered_books, AI-ul a sugerat folosirea Math.Clamp(top, 1, 10) pentru validarea parametrului. Această soluție nu era potrivită cerinței, deoarece modifica automat valorile invalide în loc să returneze o eroare.
+Am corectat implementarea folosind ArgumentException, astfel încât pentru top = 50 să fie afișat un mesaj de eroare clar.
