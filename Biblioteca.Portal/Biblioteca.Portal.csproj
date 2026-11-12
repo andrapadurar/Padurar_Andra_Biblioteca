@@ -15,6 +15,7 @@
     </PackageReference>
   </ItemGroup>
 	<ItemGroup>
+		<Protobuf Include="Protos\ratings.proto" GrpcServices="Client" />
 		<Protobuf Include="Protos\recommender.proto" GrpcServices="Client" />
 	</ItemGroup>
 

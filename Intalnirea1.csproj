@@ -47,9 +47,12 @@
     <Folder Include="Mcp\" />
     <Folder Include="Protos\" />
   </ItemGroup>
+
 	<ItemGroup>
 		<Protobuf Include="Protos\recommender.proto" GrpcServices="Server" />
+		<Protobuf Include="Protos\ratings.proto" GrpcServices="Server" />
 	</ItemGroup>
+
 
 	<ItemGroup>
 		<Compile Remove="Biblioteca.Client\**\*.cs" />

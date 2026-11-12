@@ -45,8 +45,16 @@ Pentru Top = 50, rezultatul așteptat este InvalidArgument, cu mesajul „top po
 La oprirea serverului Biblioteca, Portalul a afișat Unavailable: Error connecting to subchannel.
 
 ### S1 – Evaluările cititorului
+Am creat serviciul ReaderRatings, cu operațiile ListRatings, GetRating, AddRating, UpdateRating și DeleteRating.
 
-[De completat după implementare]
+Am implementat paginile pentru afișarea, adăugarea, editarea și ștergerea evaluărilor în Biblioteca.Portal.
+
+Am testat operațiile pentru cititorul 1068. Adăugarea, afișarea, modificarea și ștergerea funcționează.
+
+Pentru cartea 999, serviciul a returnat eroarea NotFound.
+
+Pentru nota 7, serviciul a returnat eroarea InvalidArgument.
+Am putea implementa autentificare pentru a permite  cititorului  să-și gestioneze doar propriile evaluările.
 
 ### S2 – Tool MCP: most_ordered_books
 

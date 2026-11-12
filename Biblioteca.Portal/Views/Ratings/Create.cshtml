@@ -1,0 +1,59 @@
+﻿@model BibliotecaGrpc.NewRating
+
+@{
+    ViewData["Title"] = "Adaugă evaluare";
+    int readerId = ViewBag.ReaderId != null
+        ? (int)ViewBag.ReaderId
+        : 1068;
+}
+
+<h1>Adaugă evaluare</h1>
+
+<form asp-action="Create" method="post">
+
+    @Html.AntiForgeryToken()
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="mb-3">
+        <label asp-for="ReaderId" class="form-label">
+            ID cititor
+        </label>
+        <input asp-for="ReaderId"
+               value="@readerId"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BookId" class="form-label">
+            ID carte
+        </label>
+        <input asp-for="BookId"
+               class="form-control"
+               type="number" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Stars" class="form-label">
+            Notă (1–5)
+        </label>
+        <input asp-for="Stars"
+               class="form-control"
+               type="number" />
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Salvează evaluarea
+    </button>
+
+    <a asp-action="Index"
+       asp-route-readerId="@readerId"
+       class="btn btn-secondary">
+        Înapoi
+    </a>
+</form>

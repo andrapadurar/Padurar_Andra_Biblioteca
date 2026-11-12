@@ -1,0 +1,76 @@
+﻿@model List<BibliotecaGrpc.RatingItem>
+
+@{
+    ViewData["Title"] = "Evaluările mele";
+    int readerId = ViewBag.ReaderId;
+}
+
+<h1>Evaluările mele</h1>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <label class="form-label">ID cititor</label>
+        <input type="number" name="readerId"
+               value="@readerId" class="form-control" />
+    </div>
+
+    <div class="col-auto align-self-end">
+        <button type="submit" class="btn btn-primary">Caută</button>
+    </div>
+</form>
+
+<a asp-action="Create"
+   asp-route-readerId="@readerId"
+   class="btn btn-success mb-3">
+    Adaugă evaluare
+</a>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+@if (Model.Count == 0)
+{
+    <p>Nu există evaluări pentru acest cititor.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Carte</th>
+                <th>Nota</th>
+                <th>Data</th>
+                <th>Acțiuni</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Id</td>
+                    <td>@r.Title</td>
+                    <td>@r.Stars</td>
+                    <td>@r.CreatedAt.ToDateTime().ToLocalTime().ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-info">Detalii</a>
+
+                        <a asp-action="Edit" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-warning">Editare</a>
+
+                        <a asp-action="Delete" asp-route-id="@r.Id"
+                           class="btn btn-sm btn-danger">Ștergere</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

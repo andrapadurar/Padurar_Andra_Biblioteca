@@ -47,6 +47,7 @@ builder.Services.AddScoped<RecommendationService>();
 var app = builder.Build();
 app.MapMcp("/mcp");
 app.MapGrpcService<RecommenderGrpcService>();
+app.MapGrpcService<ReaderRatingsGrpcService>();
 
 
 

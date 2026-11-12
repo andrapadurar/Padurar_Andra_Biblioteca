@@ -8,6 +8,13 @@ builder.Services.AddGrpcClient<Recommender.RecommenderClient>(o =>
 {
     o.Address = new Uri(builder.Configuration["Biblioteca:GrpcAddress"]!);
 });
+
+builder.Services.AddGrpcClient<ReaderRatings.ReaderRatingsClient>(o =>
+{
+    o.Address = new Uri(
+        builder.Configuration["Biblioteca:GrpcAddress"]!);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,0 +1,39 @@
+﻿@model BibliotecaGrpc.RatingItem
+
+@{
+    ViewData["Title"] = "Șterge evaluarea";
+}
+
+<h1>Șterge evaluarea</h1>
+
+<div class="alert alert-warning">
+    Ești sigur că dorești să ștergi această evaluare?
+</div>
+
+<div class="mb-3">
+    <strong>Carte:</strong> @Model.Title
+</div>
+
+<div class="mb-3">
+    <strong>Notă:</strong> @Model.Stars
+</div>
+
+<div class="mb-3">
+    <strong>Data evaluării:</strong>
+    @Model.CreatedAt.ToDateTime().ToLocalTime().ToString("dd.MM.yyyy")
+</div>
+
+<form asp-action="Delete"
+      asp-route-id="@Model.Id"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <button type="submit" class="btn btn-danger">
+        Confirmă ștergerea
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Anulează
+    </a>
+</form>
